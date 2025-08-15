@@ -1,0 +1,130 @@
+openapi: 3.1.0
+info:
+  title: IdeaBoard API
+  version: 0.1.0
+paths:
+  /ai/run:
+    post:
+      summary: Run AI model for a thread
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AiRunRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AiRunResponse"
+  /attachments/sign-url:
+    post:
+      summary: Create attachment and get signed upload URL
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AttachmentSignRequest"
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AttachmentSignResponse"
+  /webhooks/stripe:
+    post:
+      summary: Stripe webhook
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  received:
+                    type: boolean
+components:
+  schemas:
+    AiRunRequest:
+      type: object
+      properties:
+        threadId:
+          type: string
+        input:
+          type: string
+        model:
+          type: string
+        temperature:
+          type: number
+        attachments:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: string
+        rag:
+          type: object
+          properties:
+            topK:
+              type: integer
+            usePolicies:
+              type: boolean
+            useKnowledge:
+              type: boolean
+      required: [threadId, input]
+    AiRunResponse:
+      type: object
+      properties:
+        messageId:
+          type: string
+        output:
+          type: object
+          properties:
+            text:
+              type: string
+        usage:
+          type: object
+          properties:
+            tokens_in:
+              type: integer
+            tokens_out:
+              type: integer
+            usd_cost:
+              type: number
+        latency_ms:
+          type: integer
+    AttachmentSignRequest:
+      type: object
+      properties:
+        boardId:
+          type: string
+        nodeId:
+          type: string
+        mime:
+          type: string
+        type:
+          type: string
+          enum: [audio, image, doc]
+      required: [boardId, mime, type]
+    AttachmentSignResponse:
+      type: object
+      properties:
+        attachment:
+          type: object
+          properties:
+            id:
+              type: string
+            url:
+              type: string
