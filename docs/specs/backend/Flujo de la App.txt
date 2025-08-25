@@ -1,0 +1,87 @@
+# Flujo de la App - Ideaboard App
+
+## Fase 1: Autenticación
+1. **Registro/Inicio de Sesión**
+   - Usuario accede a la app
+   - Se muestra formulario (A.1/A.2)
+   - Al enviar: Validar credenciales (B.1) o Crear usuario (B.2)
+   - Se genera token JWT (B.3)
+   - Redirección al Dashboard
+
+## Fase 2: Dashboard
+1. **Lista de Proyectos**
+   - Se muestran proyectos del usuario (A.3 ← B.4)
+   - Opciones:
+     - Buscar proyectos (A.4 → B.5)
+     - Crear nuevo proyecto (A.5 → B.6)
+2. **Creación de Proyecto**
+   - Modal para ingresar nombre (A.5)
+   - Al guardar: Proyecto creado en BD (B.6)
+   - Se genera resumen automático con IA (B.19)
+
+## Fase 3: Ideaboard
+1. **Acceso al Ideaboard**
+   - Seleccionar proyecto del Dashboard
+   - Redirección a /ideaboard/:id
+   - Se carga información del proyecto (A.18 ← B.19)
+   - Se cargan bloques existentes (A.6 ← B.7)
+
+2. **Gestión de Bloques**
+   - **Añadir bloques** (A.7-A.10 → B.8-B.11):
+     - Objetivo: ¿Qué quiero lograr?
+     - Contexto: ¿Qué información usar?
+     - Restricción: ¿Qué evitar/incluir?
+     - Formato: ¿Cómo presentar el resultado?
+   - **Editar bloques** (A.11 → B.12)
+   - **Eliminar bloques** (A.12 → B.13)
+   - **Reordenar bloques** (A.13 → B.14) con drag & drop
+
+3. **Gestión de Archivos**
+   - **Subir archivos** (A.14 → B.15)
+   - **Ver lista de archivos** (A.22 ← B.23)
+   - **Descargar archivos** (A.23 → B.24)
+   - **Preparar para impresión** (A.24 → B.25) - Premium
+
+4. **Comandos de Voz**
+   - **Activar micrófono** (A.15)
+   - **Procesar comando** (B.16)
+   - Ejecutar acción correspondiente (ej: "Añadir bloque objetivo")
+
+5. **Generación de Contenido**
+   - **Botón Generar** (A.16)
+   - **Construir prompt** con bloques (B.17)
+   - **Enviar a GLM-4.5** (B.18)
+   - **Mostrar resultado** (A.17)
+
+6. **Plantillas**
+   - **Aplicar plantilla** (A.20 → B.21)
+   - **Guardar como plantilla** (A.21 → B.22)
+
+## Fase 4: Configuración
+1. **Perfil de Usuario**
+   - **Mostrar perfil** (A.25 ← B.26)
+   - **Actualizar datos** (A.26 → B.27)
+
+2. **Historial de Versiones (Premium)**
+   - **Ver historial** (A.27 ← B.28)
+   - **Revertir versión** (A.28 → B.29)
+
+## Fase 5: Notificaciones
+- **Enviar notificaciones** (B.30) desde backend
+- **Mostrar en panel** (A.29) en frontend
+- Tipos: "IA terminó", "Archivo compartido", etc.
+
+## Diagrama de Flujo Principal
+```mermaid
+graph TD
+    Login --> Dashboard
+    Dashboard --> CrearProyecto
+    Dashboard --> SeleccionarProyecto
+    SeleccionarProyecto --> Ideaboard
+    Ideaboard --> AñadirBloques
+    AñadirBloques --> GenerarContenido
+    GenerarContenido --> DescargarOImprimir
+    Ideaboard --> GestionarArchivos
+    Ideaboard --> Plantillas
+    Ideaboard --> Configuración
+    Configuración --> HistorialVersiones

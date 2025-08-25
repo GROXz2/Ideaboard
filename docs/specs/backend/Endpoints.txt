@@ -1,0 +1,127 @@
+# Endpoints API - Ideaboard App
+
+## Autenticación
+### POST /auth/register
+- Descripción: Registrar nuevo usuario
+- Request: { email, password, name }
+- Response: { message, user }
+
+### POST /auth/login
+- Descripción: Iniciar sesión
+- Request: { email, password }
+- Response: { token, user }
+
+## Proyectos
+### GET /projects
+- Descripción: Obtener proyectos del usuario
+- Auth: Requerida
+- Response: { projects: [...] }
+
+### POST /projects
+- Descripción: Crear nuevo proyecto
+- Auth: Requerida
+- Request: { name }
+- Response: { message, project }
+
+### PUT /projects/:id/label
+- Descripción: Actualizar etiqueta personalizada
+- Auth: Requerida
+- Request: { label }
+- Response: { message, project }
+
+### PUT /projects/:id/summary
+- Descripción: Actualizar resumen de IA
+- Auth: Requerida
+- Request: { summary }
+- Response: { message, project }
+
+## Bloques
+### GET /projects/:id/blocks
+- Descripción: Obtener bloques de proyecto
+- Auth: Requerida
+- Response: { blocks: [...] }
+
+### POST /blocks
+- Descripción: Crear nuevo bloque
+- Auth: Requerida
+- Request: { type, content, projectId }
+- Response: { message, block }
+
+### PUT /blocks/:id
+- Descripción: Actualizar bloque
+- Auth: Requerida
+- Request: { content }
+- Response: { message, block }
+
+### PUT /blocks/reorder
+- Descripción: Reordenar bloques
+- Auth: Requerida
+- Request: { projectId, blocks: [{id, order}] }
+- Response: { message }
+
+### DELETE /blocks/:id
+- Descripción: Eliminar bloque
+- Auth: Requerida
+- Response: { message }
+
+## IA
+### POST /generate
+- Descripción: Generar contenido con IA
+- Auth: Requerida
+- Request: { projectId, format }
+- Response: { content }
+
+## Archivos
+### POST /files/upload
+- Descripción: Subir archivo
+- Auth: Requerida
+- Request: multipart/form-data (file, projectId)
+- Response: { message, file }
+
+### GET /files/:id/download
+- Descripción: Generar enlace de descarga
+- Auth: Requerida
+- Response: { downloadUrl }
+
+### POST /files/:id/print
+- Descripción: Preparar para impresión (Premium)
+- Auth: Requerida
+- Request: { format }
+- Response: { printUrl }
+
+## Plantillas
+### GET /templates
+- Descripción: Obtener plantillas
+- Auth: Requerida
+- Response: { templates: [...] }
+
+### POST /templates
+- Descripción: Guardar como plantilla
+- Auth: Requerida
+- Request: { name, description, projectId, isPublic }
+- Response: { message, template }
+
+### POST /projects/:id/apply-template
+- Descripción: Aplicar plantilla
+- Auth: Requerida
+- Request: { templateId }
+- Response: { message, blocks }
+
+## Versiones (Premium)
+### GET /projects/:id/versions
+- Descripción: Obtener historial de versiones
+- Auth: Requerida (Premium)
+- Response: { versions: [...] }
+
+### POST /projects/:id/revert
+- Descripción: Revertir a versión anterior
+- Auth: Requerida (Premium)
+- Request: { versionId }
+- Response: { message }
+
+## Errores Comunes
+- 401: No autenticado
+- 403: Sin permisos
+- 404: Recurso no encontrado
+- 422: Datos inválidos
+- 500: Error del servidor

@@ -1,0 +1,337 @@
+# Funciones - Ideaboard App
+
+## Login/Registro
+### Funciones Activas (Frontend)
+- **A.1 Mostrar formulario login**
+  - Componente: Login.tsx
+  - Entrada: Ninguna
+  - Salida: Formulario con email/contraseña
+  - Relaciones: → B.1 Validar credenciales
+
+- **A.2 Mostrar formulario registro**
+  - Componente: Register.tsx
+  - Entrada: Ninguna
+  - Salida: Formulario con email/contraseña/nombre
+  - Relaciones: → B.2 Crear usuario
+
+### Funciones Backend
+- **B.1 Validar credenciales**
+  - Endpoint: POST /auth/login
+  - Entrada: { email, password }
+  - Salida: Token JWT + usuario
+  - Relaciones: → B.3 Generar token JWT
+
+- **B.2 Crear usuario**
+  - Endpoint: POST /auth/register
+  - Entrada: { email, password, name }
+  - Salida: Usuario creado
+  - Relaciones: → B.3 Generar token JWT
+
+- **B.3 Generar token JWT**
+  - Servicio: AuthService.generateToken
+  - Entrada: Objeto usuario
+  - Salida: Token JWT
+  - Relaciones: ← B.1, B.2
+
+## Dashboard
+### Funciones Activas (Frontend)
+- **A.3 Mostrar lista de proyectos**
+  - Componente: DashboardPage.tsx
+  - Entrada: Ninguna
+  - Salida: Lista de proyectos
+  - Relaciones: ← B.4 Obtener proyectos
+
+- **A.4 Buscar proyectos**
+  - Componente: DashboardPage.tsx
+  - Entrada: Término búsqueda
+  - Salida: Proyectos filtrados
+  - Relaciones: → B.5 Filtrar proyectos
+
+- **A.5 Crear nuevo proyecto**
+  - Componente: CreateProjectModal.tsx
+  - Entrada: Nombre proyecto
+  - Salida: Proyecto creado
+  - Relaciones: → B.6 Guardar proyecto
+
+### Funciones Backend
+- **B.4 Obtener proyectos del usuario**
+  - Endpoint: GET /projects
+  - Entrada: Token JWT
+  - Salida: Lista proyectos
+  - Relaciones: → A.3 Mostrar lista
+
+- **B.5 Filtrar proyectos**
+  - Endpoint: GET /projects?q=termino
+  - Entrada: Término búsqueda
+  - Salida: Proyectos filtrados
+  - Relaciones: ← A.4 Buscar proyectos
+
+- **B.6 Guardar proyecto en BD**
+  - Endpoint: POST /projects
+  - Entrada: { name }
+  - Salida: Proyecto creado
+  - Relaciones: ← A.5 Crear proyecto
+
+## Ideaboard
+### Funciones Activas (Frontend)
+- **A.6 Mostrar bloques de proyecto**
+  - Componente: IdeaboardPage.tsx
+  - Entrada: ID proyecto
+  - Salida: Lista de bloques
+  - Relaciones: ← B.7 Obtener bloques
+
+- **A.7-A.10 Añadir bloques (objetivo/contexto/restricción/formato)**
+  - Componente: AddBlockButton.tsx
+  - Entrada: Contenido bloque
+  - Salida: Bloque creado
+  - Relaciones: → B.8-B.11 Crear bloques
+
+- **A.11 Editar contenido de bloque**
+  - Componentes: Block*.tsx
+  - Entrada: Nuevo contenido
+  - Salida: Bloque actualizado
+  - Relaciones: → B.12 Actualizar bloque
+
+- **A.12 Eliminar bloque**
+  - Componentes: Block*.tsx
+  - Entrada: ID bloque
+  - Salida: Bloque eliminado
+  - Relaciones: → B.13 Eliminar bloque
+
+- **A.13 Reordenar bloques**
+  - Componente: IdeaboardPage.tsx (dnd-kit)
+  - Entrada: Nuevo orden
+  - Salida: Bloques reordenados
+  - Relaciones: → B.14 Actualizar orden
+
+- **A.14 Subir archivo**
+  - Componente: FileUploader.tsx
+  - Entrada: Archivo
+  - Salida: Archivo subido
+  - Relaciones: → B.15 Subir a almacenamiento
+
+- **A.15 Activar voz**
+  - Componente: VoiceCommandButton.tsx
+  - Entrada: Comando voz
+  - Salida: Comando reconocido
+  - Relaciones: → B.16 Procesar comando voz
+
+- **A.16 Generar contenido con IA**
+  - Componente: GenerateContentButton.tsx
+  - Entrada: Formato salida
+  - Salida: Contenido generado
+  - Relaciones: → B.17 Construir prompt
+
+- **A.17 Mostrar resultado**
+  - Componente: IdeaboardPage.tsx
+  - Entrada: Contenido generado
+  - Salida: Vista con resultado
+  - Relaciones: ← B.18 Llamar a GLM-4.5
+
+- **A.18 Ver resumen de IA**
+  - Componente: ClassHeader.tsx
+  - Entrada: Resumen
+  - Salida: Vista con resumen
+  - Relaciones: ← B.19 Obtener aiSummary
+
+- **A.19 Editar etiqueta**
+  - Componente: ClassHeader.tsx
+  - Entrada: Nueva etiqueta
+  - Salida: Etiqueta actualizada
+  - Relaciones: → B.20 Actualizar userLabel
+
+- **A.20 Cambiar plantilla**
+  - Componente: TemplateSelector.tsx
+  - Entrada: ID plantilla
+  - Salida: Plantilla aplicada
+  - Relaciones: → B.21 Aplicar plantilla
+
+- **A.21 Guardar plantilla**
+  - Componente: SaveAsTemplateButton.tsx
+  - Entrada: Nombre, descripción, privacidad
+  - Salida: Plantilla creada
+  - Relaciones: → B.22 Guardar como plantilla
+
+### Funciones Backend
+- **B.7 Obtener bloques**
+  - Endpoint: GET /projects/:id/blocks
+  - Entrada: ID proyecto
+  - Salida: Lista bloques
+  - Relaciones: → A.6 Mostrar bloques
+
+- **B.8-B.11 Crear bloques (objetivo/contexto/restricción/formato)**
+  - Endpoint: POST /blocks
+  - Entrada: { type, content, projectId }
+  - Salida: Bloque creado
+  - Relaciones: ← A.7-A.10 Añadir bloques
+
+- **B.12 Actualizar bloque**
+  - Endpoint: PUT /blocks/:id
+  - Entrada: { content }
+  - Salida: Bloque actualizado
+  - Relaciones: ← A.11 Editar bloque
+
+- **B.13 Eliminar bloque de BD**
+  - Endpoint: DELETE /blocks/:id
+  - Entrada: ID bloque
+  - Salida: Bloque eliminado
+  - Relaciones: ← A.12 Eliminar bloque
+
+- **B.14 Actualizar orden en BD**
+  - Endpoint: PUT /blocks/reorder
+  - Entrada: { projectId, blocks: [{id, order}] }
+  - Salida: Orden actualizado
+  - Relaciones: ← A.13 Reordenar bloques
+
+- **B.15 Subir a almacenamiento**
+  - Servicio: StorageService.uploadFile
+  - Entrada: Archivo
+  - Salida: URL archivo
+  - Relaciones: ← A.14 Subir archivo
+
+- **B.16 Procesar comando de voz**
+  - Servicio: VoiceService.processCommand
+  - Entrada: Audio
+  - Salida: Texto reconocido
+  - Relaciones: ← A.15 Activar voz
+
+- **B.17 Construir prompt**
+  - Servicio: AIService.generateContent
+  - Entrada: Bloques + formato
+  - Salida: Prompt estructurado
+  - Relaciones: ← A.16 Generar contenido
+
+- **B.18 Llamar a GLM-4.5**
+  - Servicio: AIService.generateContent
+  - Entrada: Prompt
+  - Salida: Contenido generado
+  - Relaciones: → A.17 Mostrar resultado
+
+- **B.19 Obtener aiSummary**
+  - Endpoint: GET /projects/:id/summary
+  - Entrada: ID proyecto
+  - Salida: Resumen
+  - Relaciones: → A.18 Ver resumen
+
+- **B.20 Actualizar userLabel**
+  - Endpoint: PUT /projects/:id/label
+  - Entrada: { label }
+  - Salida: Etiqueta actualizada
+  - Relaciones: ← A.19 Editar etiqueta
+
+- **B.21 Aplicar plantilla**
+  - Endpoint: POST /projects/:id/apply-template
+  - Entrada: { templateId }
+  - Salida: Bloques creados
+  - Relaciones: ← A.20 Cambiar plantilla
+
+- **B.22 Guardar como plantilla**
+  - Endpoint: POST /templates
+  - Entrada: { name, description, projectId, isPublic }
+  - Salida: Plantilla creada
+  - Relaciones: ← A.21 Guardar plantilla
+
+## Gestión de Archivos
+### Funciones Activas (Frontend)
+- **A.22 Mostrar lista de archivos**
+  - Componente: FileList.tsx
+  - Entrada: ID proyecto
+  - Salida: Lista archivos
+  - Relaciones: ← B.23 Obtener archivos
+
+- **A.23 Descargar archivo**
+  - Componente: FileItem.tsx
+  - Entrada: ID archivo
+  - Salida: Archivo descargado
+  - Relaciones: → B.24 Generar enlace descarga
+
+- **A.24 Compartir archivo**
+  - Componente: FileItem.tsx
+  - Entrada: ID archivo + formato
+  - Salida: Archivo preparado
+  - Relaciones: → B.25 Preparar impresión
+
+### Funciones Backend
+- **B.23 Obtener archivos de proyecto**
+  - Endpoint: GET /projects/:id/files
+  - Entrada: ID proyecto
+  - Salida: Lista archivos
+  - Relaciones: → A.22 Mostrar lista
+
+- **B.24 Generar enlace de descarga**
+  - Endpoint: GET /files/:id/download
+  - Entrada: ID archivo
+  - Salida: URL descarga
+  - Relaciones: ← A.23 Descargar archivo
+
+- **B.25 Preparar para impresión**
+  - Endpoint: POST /files/:id/print
+  - Entrada: { format }
+  - Salida: URL impresión
+  - Relaciones: ← A.24 Compartir archivo
+
+## Configuración
+### Funciones Activas (Frontend)
+- **A.25 Mostrar perfil**
+  - Componente: SettingsPage.tsx
+  - Entrada: Ninguna
+  - Salida: Datos usuario
+  - Relaciones: ← B.26 Obtener datos usuario
+
+- **A.26 Actualizar perfil**
+  - Componente: ProfileForm.tsx
+  - Entrada: Nuevo nombre
+  - Salida: Perfil actualizado
+  - Relaciones: → B.27 Guardar cambios
+
+- **A.27 Historial de versiones (Premium)**
+  - Componente: VersionHistory.tsx
+  - Entrada: ID proyecto
+  - Salida: Lista versiones
+  - Relaciones: ← B.28 Obtener historial
+
+- **A.28 Revertir versión (Premium)**
+  - Componente: VersionHistory.tsx
+  - Entrada: ID versión
+  - Salida: Proyecto restaurado
+  - Relaciones: → B.29 Restaurar versión
+
+### Funciones Backend
+- **B.26 Obtener datos de usuario**
+  - Endpoint: GET /user
+  - Entrada: Token JWT
+  - Salida: Datos usuario
+  - Relaciones: → A.25 Mostrar perfil
+
+- **B.27 Guardar cambios**
+  - Endpoint: PUT /user
+  - Entrada: { name }
+  - Salida: Usuario actualizado
+  - Relaciones: ← A.26 Actualizar perfil
+
+- **B.28 Obtener historial**
+  - Endpoint: GET /projects/:id/versions
+  - Entrada: ID proyecto
+  - Salida: Lista versiones
+  - Relaciones: → A.27 Historial versiones
+
+- **B.29 Restaurar versión**
+  - Endpoint: POST /projects/:id/revert
+  - Entrada: { versionId }
+  - Salida: Proyecto restaurado
+  - Relaciones: ← A.28 Revertir versión
+
+## Notificaciones
+### Funciones Activas (Frontend)
+- **A.29 Mostrar notificaciones**
+  - Componente: NotificationPanel.tsx
+  - Entrada: Ninguna
+  - Salida: Lista notificaciones
+  - Relaciones: ← B.30 Enviar notificación
+
+### Funciones Backend
+- **B.30 Enviar notificación**
+  - Servicio: NotificationService.sendNotification
+  - Entrada: { userId, message, type }
+  - Salida: Notificación enviada
+  - Relaciones: → A.29 Mostrar notificaciones

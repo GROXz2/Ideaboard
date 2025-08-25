@@ -1,0 +1,252 @@
+# Servicios Backend - Ideaboard App
+
+## AIService
+Servicio para interactuar con modelos de IA (GLM-4.5)
+
+### Métodos:
+- `generateContent(blocks, format)`: 
+  - Construye prompt estructurado
+  - Envía a GLM-4.5
+  - Retorna contenido generado
+  
+- `generateProjectSummary(projectName, files)`:
+  - Genera resumen automático
+  - Usa nombres de archivos como contexto
+
+## StorageService
+Servicio para manejo de archivos en la nube
+
+### Métodos:
+- `uploadFile(file)`: 
+  - Sube a AWS S3/Google Cloud
+  - Retorna URL pública
+  
+- `deleteFile(url)`: 
+  - Elimina archivo de la nube
+  
+- `generateDownloadUrl(url)`: 
+  - Genera URL temporal de descarga
+
+## OCRService
+Servicio para reconocimiento de texto
+
+### Métodos:
+- `extractText(imagePath)`:
+  - Usa Tesseract.js (gratis)
+  - O Google Cloud Vision (pago)
+  - Retorna texto extraído
+
+## AuthService
+Servicio de autenticación
+
+### Métodos:
+- `hashPassword(password)`: 
+  - Hashea con bcrypt
+  
+- `comparePassword(password, hash)`: 
+  - Verifica contraseña
+  
+- `generateToken(user)`: 
+  - Genera JWT
+  
+- `verifyToken(token)`: 
+  - Verifica y decodifica JWT
+
+## TemplateService
+Servicio para manejo de plantillas
+
+### Métodos:
+- `createTemplate(userId, name, description, blocks, isPublic)`:
+  - Crea nueva plantilla
+  
+- `applyTemplate(projectId, templateId)`:
+  - Aplica plantilla a proyecto
+  - Crea bloques basados en plantilla
+
+## VersionService (Premium)
+Servicio para control de versiones
+
+### Métodos:
+- `createVersion(projectId)`:
+  - Crea instantánea del proyecto
+  - Almacena como nueva versión
+  
+- `revertToVersion(projectId, versionId)`:
+  - Restaura proyecto a versión anterior
+
+## NotificationService
+Servicio para notificaciones en tiempo real
+
+### Métodos:
+- `sendNotification(userId, message, type)`:
+  - Usa WebSockets o Firebase Cloud Messaging
+  - Envía notificación al usuario
+
+## Configuración
+Variables de entorno requeridas:
+```env
+# IA
+GLM_API_KEY=tu-api-key
+GLM_BASE_URL=https://api.zhipuai.us/v1
+GLM_MODEL=glm-4.5-air
+
+# Almacenamiento
+AWS_ACCESS_KEY_ID=tu-access-key
+AWS_SECRET_ACCESS_KEY=tu-secret-key
+AWS_BUCKET_NAME=ideabucket
+
+# JWT
+JWT_SECRET=tu-secreto-jwt
+JWT_EXPIRES_IN=7d
+
+# OCR
+OCR_ENGINE=tesseract # o 'google'
+
+---
+
+### **4. Componentes Clave (Completo)**
+```markdown
+# Componentes Frontend - Ideaboard App
+
+## Autenticación
+### Login.tsx
+- Props: onLogin(email, password)
+- Estado: email, password, loading, error
+- Función: Formulario de inicio de sesión
+
+### Register.tsx
+- Props: onRegister(email, password, name)
+- Estado: email, password, name, loading, error
+- Función: Formulario de registro
+
+## Dashboard
+### DashboardPage.tsx
+- Estado: projects, loading, error
+- Función: Lista proyectos del usuario
+- Componentes: ProjectCard, CreateProjectModal
+
+### ProjectCard.tsx
+- Props: project, onClick
+- Función: Muestra información del proyecto
+- Eventos: onClick para seleccionar proyecto
+
+### CreateProjectModal.tsx
+- Props: onCreate, onClose
+- Estado: name, loading, error
+- Función: Modal para crear proyecto
+
+## Ideaboard
+### IdeaboardPage.tsx
+- Props: projectId
+- Estado: project, blocks, loading, error
+- Función: Vista principal con bloques
+- Componentes: ClassHeader, AddBlockButton, GenerateContentButton
+
+### ClassHeader.tsx
+- Props: project, onUpdateLabel
+- Función: Muestra información del proyecto
+- Permite editar etiqueta personalizada
+
+### BlockObjective.tsx
+- Props: block, onChange, onRemove
+- Función: Bloque para definir objetivos
+- Contenido: textarea para edición
+
+### BlockContext.tsx
+- Props: block, files, onAddFile, onRemoveFile, onChange, onRemove
+- Función: Bloque para contexto con archivos
+- Contenido: Lista de archivos y textarea
+
+### BlockRestriction.tsx
+- Props: block, onChange, onRemove
+- Función: Bloque para restricciones
+- Contenido: textarea para edición
+
+### BlockFormat.tsx
+- Props: block, onChange, onRemove
+- Función: Bloque para formato de salida
+- Contenido: textarea para edición
+
+### AddBlockButton.tsx
+- Props: onAddBlock
+- Función: Menú para añadir bloques
+- Opciones: Objetivo, Contexto, Restricción, Formato
+
+### GenerateContentButton.tsx
+- Props: onGenerate
+- Función: Botón para generar contenido con IA
+- Estado: loading
+
+### TemplateSelector.tsx
+- Props: templates, onApplyTemplate
+- Función: Selector de plantillas
+- Muestra lista de plantillas disponibles
+
+### SaveAsTemplateButton.tsx
+- Props: onSaveAsTemplate
+- Función: Guarda proyecto como plantilla
+- Abre modal con formulario
+
+## Gestión de Archivos
+### FileUploader.tsx
+- Props: onUpload
+- Función: Botón para subir archivos
+- Maneja selección de archivos
+
+### FileList.tsx
+- Props: files, onDownload, onPrint, onRemove
+- Función: Lista de archivos del proyecto
+- Componentes: FileItem
+
+### FileItem.tsx
+- Props: file, onDownload, onPrint, onRemove
+- Función: Item individual de archivo
+- Botones: Descargar, Imprimir (premium), Eliminar
+
+## Configuración
+### SettingsPage.tsx
+- Estado: user, loading, error
+- Función: Página de configuración
+- Componentes: ProfileForm, VersionHistory (premium)
+
+### ProfileForm.tsx
+- Props: user, onUpdate
+- Estado: name, loading, error
+- Función: Formulario para actualizar perfil
+
+### VersionHistory.tsx (Premium)
+- Props: versions, onRevert
+- Función: Historial de versiones
+- Muestra lista con opción de revertir
+
+## Voz
+### VoiceCommandButton.tsx
+- Props: onCommand
+- Estado: listening, error
+- Función: Botón para comandos de voz
+- Usa Web Speech API
+
+## Notificaciones
+### NotificationPanel.tsx
+- Props: notifications, onDismiss
+- Función: Panel de notificaciones
+- Componentes: NotificationItem
+
+### NotificationItem.tsx
+- Props: notification, onDismiss
+- Función: Item individual de notificación
+- Muestra mensaje y tipo
+
+## Comunes
+### LoadingSpinner.tsx
+- Props: size ('small' | 'medium' | 'large')
+- Función: Indicador de carga animado
+
+### ErrorMessage.tsx
+- Props: message, onRetry
+- Función: Muestra errores con opción de reintentar
+
+### Modal.tsx
+- Props: isOpen, onClose, title, children
+- Función: Modal reutilizable
+- Maneja cierre con click fuera

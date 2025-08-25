@@ -1,0 +1,113 @@
+# Modelo de Datos (PostgreSQL/Supabase) - Ideaboard App
+
+## Notas
+- UUID v4 para todas las PK.
+- Timestamps: created_at / updated_at (timestamptz).
+- Enum sugeridos para type/role/status.
+- Compatible con endpoints actuales (Projects/Blocks/Files/Templates/Versions).
+- Equivalencias con ERD previo: Project≈Board, Block≈Node, File≈Attachment. (Puedes mapear con vistas si luego migras nombres).
+
+## User (app_user)
+- id: uuid (PK)
+- email: text (unique, not null)
+- password: text (hashed, not null)
+- name: text (not null)
+- plan: enum('free','premium') default 'free'
+- created_at: timestamptz default now()
+
+Índices:
+- unique(email)
+
+## Project (project)
+- id: uuid (PK)
+- user_id: uuid (FK -> app_user.id, not null)
+- name: text (not null)
+- user_label: text
+- ai_summary: text
+- template_id: uuid (FK -> template.id, null)
+- created_at: timestamptz default now()
+- updated_at: timestamptz default now()
+
+Índices:
+- idx_project_user (user_id)
+- idx_project_template (template_id)
+
+## Block (block)
+- id: uuid (PK)
+- project_id: uuid (FK -> project.id, not null)
+- type: enum('objective','context','restriction','format') (not null)
+- content: jsonb default '{}'::jsonb
+- "order": int default 0
+- created_at: timestamptz default now()
+- updated_at: timestamptz default now()
+
+Índices:
+- idx_block_project (project_id)
+- GIN(content) opcional
+
+## File (file)
+- id: uuid (PK)
+- project_id: uuid (FK -> project.id, not null)
+- name: text (not null)
+- url: text (not null)
+- type: enum('image','pdf','audio')
+- ocr_text: text
+- created_at: timestamptz default now()
+- updated_at: timestamptz default now()
+
+Índices:
+- idx_file_project (project_id)
+- FTS opcional en ocr_text
+
+## Template (template)
+- id: uuid (PK)
+- user_id: uuid (FK -> app_user.id, not null)
+- name: text (not null)
+- description: text
+- blocks: jsonb default '[]'::jsonb  -- estructura de bloques predefinidos
+- is_public: boolean default false
+- created_at: timestamptz default now()
+- updated_at: timestamptz default now()
+
+Índices:
+- idx_template_user (user_id)
+
+## Version (version)  -- Premium
+- id: uuid (PK)
+- project_id: uuid (FK -> project.id, not null)
+- version_number: int (not null)
+- snapshot: jsonb not null   -- instantánea del proyecto (incl. blocks)
+- created_at: timestamptz default now()
+
+Índices:
+- idx_version_project (project_id)
+- unique(project_id, version_number)
+
+## (Opcional) AI History
+### ai_thread
+- id: uuid (PK)
+- project_id: uuid (FK -> project.id)
+- started_by_user_id: uuid (FK -> app_user.id)
+- title: text
+- created_at: timestamptz default now()
+- updated_at: timestamptz default now()
+
+### ai_message
+- id: uuid (PK)
+- thread_id: uuid (FK -> ai_thread.id, not null)
+- user_id: uuid (FK -> app_user.id)  -- null para assistant/tool
+- role: enum('user','assistant','system','tool') not null
+- content: text
+- output: jsonb
+- model: text
+- temperature: numeric
+- restrictions: jsonb default '{}'::jsonb  -- << clave para "temperatura por restricción"
+- tokens_in: int
+- tokens_out: int
+- usd_cost: numeric(10,4)
+- status: text default 'ok'
+- created_at: timestamptz default now()
+
+Índices:
+- idx_ai_message_thread_created (thread_id, created_at)
+- GIN(output), GIN(restrictions) (opcionales)
